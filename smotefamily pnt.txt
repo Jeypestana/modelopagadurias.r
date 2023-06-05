@@ -1,0 +1,71 @@
+library(smotefamily)
+set.seed(1234)
+smote_train <- SMOTE(mode1.train[,-16],as.numeric(mode1.train$mora, K =5))
+smote_train <- smote_train$data
+table(smote_train$class)
+
+
+#renombramos los malos como "1" y buenos como "0"
+mode1.test$mora <- ifelse(mode1.test$mora== "Si" ,1,0)
+
+#recodificamos la variable dependiente en factor de dos niveles con etiquetas
+
+#para el sub-muistreo
+#mode1.train$mora <- recode(mode1.train$mora, "1=1 ;0=0")
+table(mode1.test$mora) # al dia = 0 / mora = 1
+mode1.test$mora <- as.factor(mode1.test$mora) # convertimos como factor
+mode1.test$mora = factor(mode1.test$mora, 
+                          levels = levels(mode1.test$mora),
+                          labels = c("No","Si"),
+                          ordered = F) # agregamos etiquetas
+str(mode1.test$mora) # revisamos los cambios factos dos niveles con labels
+
+
+
+#SMOTE
+#generamos vectores para especifidad , sensitividad y ROC
+sen_s <- rep(0,10)
+esp_s <- rep(0,10)
+roc_s <- rep(0,10)
+#valores de control del modelos "library caret
+control <- trainControl(method = "cv", number = 5, classProbs = TRUE,
+                        summaryFunction = twoClassSummary)
+
+
+#renombramos los malos como "1" y buenos como "0"
+smote_train$class <- ifelse(smote_train$class== 1 ,0,1)
+
+#recodificamos la variable dependiente en factor de dos niveles con etiquetas
+
+#para el sub-muistreo
+#mode1.train$mora <- recode(mode1.train$mora, "1=1 ;0=0")
+table(smote_train$class) # al dia = 0 / mora = 1
+smote_train$class <- as.factor(smote_train$class) # convertimos como factor
+smote_train$class = factor(smote_train$class, 
+                         levels = levels(smote_train$class),
+                         labels = c("No","Si"),
+                         ordered = F) # agregamos etiquetas
+str(smote_train$class) # revisamos los cambios factos dos niveles con labels
+
+smote_train <- smote_train %>% mutate(genero = factor(genero), actividad_cliente = factor(actividad_cliente),
+                                      estado_civil = factor(estado_civil), tipo_vivienda = factor(tipo_vivienda),
+                                      regional = factor(regional) , linea_credito = factor(linea_credito))
+
+
+
+# bucle 10 para almacenar los resultados 
+for (i in 1:10) {
+  fit_smote <- train(class ~ ., data = smote_train, method = "glm", metric = "ROC", trControl = control)
+  ypred <- predict(fit_smote,mode1.test)
+  ypred=as.factor(ypred)
+  resul=confusionMatrix(ypred,mode1.test$mora,positive= "Si")
+  roc_s[i]=as.numeric(fit_smote$results[2])
+  sen_s[i]=as.numeric(fit_smote$results[3])
+  esp_s[i]=as.numeric(fit_smote$results[4])
+}
+
+# clasificacion de los que tienen mora "exito"
+sen_s
+esp_s
+roc_s
+
