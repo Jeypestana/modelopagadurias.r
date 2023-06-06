@@ -77,8 +77,8 @@ table(up_train$Class) # proporcion test igual)
 str(mode1.train)
 
 mode1.train <- mode1.train %>% mutate(genero = factor(genero), actividad_cliente = factor(actividad_cliente),
-                estado_civil = factor(estado_civil), tipo_vivienda = factor(tipo_vivienda),
-                regional = factor(regional) , linea_credito = factor(linea_credito))
+                                      estado_civil = factor(estado_civil), tipo_vivienda = factor(tipo_vivienda),
+                                      regional = factor(regional) , linea_credito = factor(linea_credito))
 
 
 # muestreo ROSE
@@ -92,8 +92,8 @@ table(rose_train$mora)
 #str(mode1.train)
 
 #mode1.train <- mode1.train %>% mutate(genero = as.numeric(genero), actividad_cliente = as.numeric(actividad_cliente),
-                                      #estado_civil = as.numeric(estado_civil), tipo_vivienda = as.numeric(tipo_vivienda),
-                                      #regional = as.numeric(regional) , linea_credito = as.numeric(linea_credito))
+#estado_civil = as.numeric(estado_civil), tipo_vivienda = as.numeric(tipo_vivienda),
+#regional = as.numeric(regional) , linea_credito = as.numeric(linea_credito))
 
 
 # Estimacion de metricas de modelos
@@ -101,9 +101,9 @@ table(rose_train$mora)
 #cambiamos a factor la variable dependiente del modselo.test
 mode1.test$mora <- as.factor(mode1.test$mora) # convertimos como factor
 mode1.test$mora = factor(mode1.test$mora, 
-                          levels = levels(mode1.test$mora),
-                          labels = c("No","Si"),
-                          ordered = F) # agregamos etiquetas
+                         levels = levels(mode1.test$mora),
+                         labels = c("No","Si"),
+                         ordered = F) # agregamos etiquetas
 
 #DOWN
 #generamos vectores para especifidad , sensitividad y ROC
@@ -204,7 +204,3 @@ aggregate(valor_r,list(modelo),mean)
 
 #comparaciones de medias especificidad
 aggregate(valor_e,list(modelo),mean)
-
-
-
-
