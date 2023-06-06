@@ -89,14 +89,21 @@ table(rose_train$mora)
 
 # muestreo SMOTE
 #revisamos las varibales que apliquen cambio a numeric
-str(mode1.train)
+#str(mode1.train)
 
-mode1.train <- mode1.train %>% mutate(genero = as.numeric(genero), actividad_cliente = as.numeric(actividad_cliente),
-                                      estado_civil = as.numeric(estado_civil), tipo_vivienda = as.numeric(tipo_vivienda),
-                                      regional = as.numeric(regional) , linea_credito = as.numeric(linea_credito))
+#mode1.train <- mode1.train %>% mutate(genero = as.numeric(genero), actividad_cliente = as.numeric(actividad_cliente),
+                                      #estado_civil = as.numeric(estado_civil), tipo_vivienda = as.numeric(tipo_vivienda),
+                                      #regional = as.numeric(regional) , linea_credito = as.numeric(linea_credito))
 
 
 # Estimacion de metricas de modelos
+
+#cambiamos a factor la variable dependiente del modselo.test
+mode1.test$mora <- as.factor(mode1.test$mora) # convertimos como factor
+mode1.test$mora = factor(mode1.test$mora, 
+                          levels = levels(mode1.test$mora),
+                          labels = c("No","Si"),
+                          ordered = F) # agregamos etiquetas
 
 #DOWN
 #generamos vectores para especifidad , sensitividad y ROC
@@ -159,9 +166,9 @@ control <- trainControl(method = "cv", number = 5, classProbs = TRUE,
 # bucle 10 para almacenar los resultados 
 for (i in 1:10) {
   fit_rose <- train(mora ~ ., data = rose_train, method = "glm", metric = "ROC", trControl = control)
-  #ypred <- predict(fit_rose,mode1.test)
-  #ypred=as.factor(ypred)
-  #resul=confusionMatrix(ypred,mode1.test$mora,positive= "Si")
+  ypred <- predict(fit_rose,mode1.test)
+  ypred=as.factor(ypred)
+  resul=confusionMatrix(ypred,mode1.test$mora,positive= "Si")
   roc_r[i]=as.numeric(fit_rose$results[2])
   sen_r[i]=as.numeric(fit_rose$results[3])
   esp_r[i]=as.numeric(fit_rose$results[4])
@@ -180,3 +187,24 @@ boxplot(sen_d,sen_r,sen_u)
 boxplot(esp_d,esp_r,esp_u)
 #vr curva roc metodo 2 mayor presencia
 boxplot(roc_d,roc_r,roc_u)
+
+
+#comparaciones de medias
+valor_s <- c(sen_d,sen_u,sen_r)
+valor_r <- c(roc_d,roc_u,roc_r)
+valor_e <- c(esp_d,esp_u,esp_r)
+
+modelo <- rep(c("down","up","rose"),each=10)
+sensitividad <- data.frame(valor_s,modelo)
+#comparaciones de medias sensitividad
+aggregate(valor_s,list(modelo),mean)
+
+#comparaciones de medias roc
+aggregate(valor_r,list(modelo),mean)
+
+#comparaciones de medias especificidad
+aggregate(valor_e,list(modelo),mean)
+
+
+
+
